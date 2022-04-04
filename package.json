@@ -1,0 +1,33 @@
+{
+  "name": "cordova-plugin-barcode-scanner",
+  "version": "1.0.0",
+  "description": "Cordova barcode scanner plugin, using Google MLKit Vision on Android and AVCaptureSession on iOS.",
+  "cordova": {
+    "id": "cordova-plugin-barcode-scanner",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
+  "author": "John Ohl",
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "scripts": {
+    "test": "jasmine-node --color spec"
+  },
+  "devDependencies": {
+    "jasmine-node": "1.14.5",
+    "pluginpub": "^0.0.9"
+  },
+  "dependencies": {
+    "nopt": "^4.0.1",
+    "shelljs": "^0.8.3"
+  }
+}

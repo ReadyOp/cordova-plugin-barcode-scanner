@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-barcode-scanner" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>cordova-plugin-barcode-scanner</name>
+    <js-module name="cordova-plugin-barcode-scanner" src="www/barcodescanner.js">
+        <clobbers target="cordova.plugins.barcodeScanner" />
+    </js-module>
+
+    <engines>
+        <engine name="cordova" version=">=7.1.0" />
+        <engine name="cordova-android" version=">=8.0.0" />
+        <engine name="cordova-ios" version=">=4.5.0" />
+    </engines>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="cordova-plugin-barcode-scanner">
+                <param name="ios-package" value="CDVBarcodeScanner" />
+            </feature>
+        </config-file>
+        <config-file target="*-Info.plist" parent="CFBundleDevelopmentRegion">
+            <string>en_US</string>
+        </config-file>
+        <config-file target="*-Info.plist" parent="CFBundleLocalizations">
+            <array>
+                <string>en</string>
+            </array>
+        </config-file>
+        <source-file src="src/ios/CDVBarcodeScanner.mm" />
+        <resource-file src="src/ios/CDVBarcodeScanner.bundle"/>
+        <resource-file src="src/ios/en.lproj/Localizable.strings" target="en.lproj/Localizable.strings" />
+        <!-- frameworks -->
+        <framework src="AVFoundation.framework" />
+        <framework src="AudioToolbox.framework" />
+    </platform>
+    <platform name="android">
+
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="cordova-plugin-barcode-scanner">
+                <param name="android-package" value="com.readyop.cordova.plugins.barcode.scanner.MLKitBarcodeScanner" />
+            </feature>
+        </config-file>
+
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-feature android:name="android.hardware.camera" android:required="false" />
+        </config-file>
+
+        <config-file parent="application" target="AndroidManifest.xml">
+            <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+            <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="barcode" />
+            <activity android:label="Read Barcode" android:name="com.readyop.cordova.plugins.barcode.scanner.CaptureActivity" android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        </config-file>
+
+        <source-file src="src/android/src/CaptureActivity.java" target-dir="src/com/readyop/cordova/plugins/readyop/barcode/scanner" />
+        <source-file src="src/android/src/MLKitBarcodeScanner.java" target-dir="src/com/readyop/cordova/plugins/readyop/barcode/scanner" />
+        <source-file src="src/android/src/utils/BitmapUtils.java" target-dir="src/com/readyop/cordova/plugins/readyop/barcode/scanner/utils" />
+        <source-file src="src/android/src/utils/FrameMetadata.java" target-dir="src/com/readyop/cordova/plugins/readyop/barcode/scanner/utils" />
+
+        <resource-file src="src/android/res/assets/beep.ogg" target="assets/beep.ogg" />
+        <resource-file src="src/android/res/values/strings-en.xml" target="res/values/strings.xml" />
+        <resource-file src="src/android/res/layout/capture_activity.xml" target="res/layout/capture_activity.xml" />
+        <resource-file src="src/android/res/drawable/flashlight.png" target="res/drawable/flashlight.png" />
+        <resource-file src="src/android/res/drawable/torch_active.xml" target="res/drawable/torch_active.xml" />
+        <resource-file src="src/android/res/drawable/torch_inactive.xml" target="res/drawable/torch_inactive.xml" />
+
+        <framework src="com.android.support:support-v4:27.1.0" />
+        <framework src="com.android.support:design:27.1.0" />
+
+        <framework src="com.google.android.gms:play-services-vision:17.0.2" />
+        <framework src="com.google.mlkit:barcode-scanning:16.2.0" />
+
+        <framework src="androidx.camera:camera-core:1.0.0-beta05" />
+        <framework src="androidx.camera:camera-camera2:1.0.0-beta05" />
+        <framework src="androidx.camera:camera-lifecycle:1.0.0-beta05" />
+        <framework src="androidx.camera:camera-view:1.0.0-alpha12" />
+        <framework src="androidx.constraintlayout:constraintlayout:2.0.4" />
+
+        <framework src="src/android/build-extras.gradle" custom="true" type="gradleReference" />
+    </platform>
+</plugin>
