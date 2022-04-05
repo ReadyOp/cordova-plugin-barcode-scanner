@@ -3,7 +3,7 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <name>cordova-plugin-barcode-scanner</name>
-    <js-module name="cordova-plugin-barcode-scanner" src="www/barcodescanner.js">
+    <js-module name="cordova-plugin-barcode-scanner" src="www/BarcodeScanner.js">
         <clobbers target="cordova.plugins.barcodeScanner" />
     </js-module>
 
