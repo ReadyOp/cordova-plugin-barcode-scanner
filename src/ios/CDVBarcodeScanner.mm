@@ -724,6 +724,9 @@ parentViewController:(UIViewController*)parentViewController {
     CGFloat height = overlayView.frame.size.height;
     CGFloat width = overlayView.frame.size.width;
     CGFloat diameterW = (float)(width * (isCard ? 0.85 : .75));
+    if (diameterW > 350) {
+        diameterW = 350;
+    }
     CGFloat diameterH = (float)(diameterW * (isCard ? 0.60 : 1));
 
     CGFloat left = width / 2 - diameterW / 2;
