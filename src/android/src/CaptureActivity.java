@@ -28,8 +28,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.Preview;
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -54,6 +57,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
@@ -241,7 +245,15 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
   @Override
   protected void onResume() {
     super.onResume();
+  }
 
+  @Override
+  protected void onStop() {
+    super.onStop();
+
+    if (this.camera != null) {
+        this.camera.getCameraControl().cancelFocusAndMetering();
+    }
   }
 
   void startCamera() {
@@ -257,7 +269,20 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       mCameraView.setScaleY(1F);
     }
 
-    // mCameraView.setScaleType(PreviewView.ScaleType.FIT_CENTER);
+    mCameraView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+      // If the camera isn't ready yet (hasn't been bound to the preview view)
+      if (this.camera == null) {
+        return;
+      }
+      MeteringPoint autoFocusPoint = new SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(.5f, .5f);
+
+      FocusMeteringAction.Builder builder = new FocusMeteringAction.Builder(autoFocusPoint);
+      builder.setAutoCancelDuration(2, TimeUnit.SECONDS);
+
+      FocusMeteringAction autoFocusAction = builder.build();
+      camera.getCameraControl().cancelFocusAndMetering();
+      camera.getCameraControl().startFocusAndMetering(autoFocusAction);
+    });
 
     cameraProviderFuture = ProcessCameraProvider.getInstance(this);
     cameraProviderFuture.addListener(() -> {
