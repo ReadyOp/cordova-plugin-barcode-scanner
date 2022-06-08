@@ -436,11 +436,11 @@ parentViewController:(UIViewController*)parentViewController {
     }
 
     self.captureSession = [[AVCaptureSession alloc] init];
-    if ([self.captureSession canSetSessionPreset: AVCaptureSessionPreset3840x2160]) {
+    if ([device supportsAVCaptureSessionPreset: AVCaptureSessionPreset3840x2160]) {
         [self.captureSession setSessionPreset: AVCaptureSessionPreset3840x2160];
-    } else if ([self.captureSession canSetSessionPreset: AVCaptureSessionPresetHigh]) {
+    } else if ([device supportsAVCaptureSessionPreset: AVCaptureSessionPresetHigh]) {
         [self.captureSession setSessionPreset: AVCaptureSessionPresetHigh];
-    } else if ([self.captureSession canSetSessionPreset: AVCaptureSessionPresetMedium]) {
+    } else if ([device supportsAVCaptureSessionPreset: AVCaptureSessionPresetMedium]) {
         [self.captureSession setSessionPreset: AVCaptureSessionPresetMedium];
     } else {
       return @"unable to preset high nor medium quality video capture";
