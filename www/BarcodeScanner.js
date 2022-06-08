@@ -114,7 +114,7 @@ class BarcodeScanner
                     cancelled: false,
                     message: null,
                 };
-                switch (err[0]) {
+                switch (e) {
                     case null:
                     case 'USER_CANCELLED':
                         result.cancelled = true;
