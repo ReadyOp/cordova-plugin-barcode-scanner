@@ -398,14 +398,15 @@ parentViewController:(UIViewController*)parentViewController {
 - (NSString *)setUpCaptureSession
 {
     AVCaptureDevice *__block device = nil;
+    AVCaptureDevicePosition position = AVCaptureDevicePositionBack;
     if (self.useFrontCamera) {
-        AVCaptureDeviceDiscoverySession *discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera] mediaType:AVMediaTypeVideo position: AVCaptureDevicePositionFront];
-        NSArray *devices = [discovery devices];
-        if ([devices count]) {
-            device = [[discovery devices] objectAtIndex: 0];
-        }
-    } else {
-        device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        position = AVCaptureDevicePositionFront;
+    }
+
+    AVCaptureDeviceDiscoverySession *discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera] mediaType:AVMediaTypeVideo position: position];
+    NSArray *devices = [discovery devices];
+    if ([devices count]) {
+        device = [[discovery devices] objectAtIndex: 0];
     }
     if (!device) {
         return @"unable to obtain video capture device";
