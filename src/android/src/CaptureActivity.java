@@ -298,24 +298,24 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
     ImageAnalysis imageAnalysis = builder.build();
 
-    BarcodeScanner scanner = BarcodeScanning
-        .getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build());
+    BarcodeScanner scanner = BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build());
 
     imageAnalysis.setAnalyzer(executor, image -> {
       if (image.getImage() == null) {
         return;
       }
+
       Bitmap bmp = BitmapUtils.getBitmap(image);
       if (bmp == null) {
         return;
       }
-
       int boxHeight = (int)(this.reticleRect.bottom - this.reticleRect.top);
       int boxWidth = (int)(this.reticleRect.right - this.reticleRect.left);
 
+      // Crop the image to just the scanner reticle
       Bitmap bitmap = Bitmap.createBitmap(bmp, (int)this.reticleRect.left, (int)this.reticleRect.top, boxWidth, boxHeight);
-      Task<List<Barcode>> task = scanner
-          .process(InputImage.fromBitmap(bitmap, image.getImageInfo().getRotationDegrees()));
+
+      Task<List<Barcode>> task = scanner.process(InputImage.fromBitmap(bitmap, image.getImageInfo().getRotationDegrees()));
       task.addOnSuccessListener(barCodes -> {
         // # Code to test image viewfinder
         /*
@@ -343,7 +343,6 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
             data.putExtra(BarcodeValue, value);
             setResult(CommonStatusCodes.SUCCESS, data);
             finish();
-
           }
         }
       });
