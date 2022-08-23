@@ -334,11 +334,13 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       if (bmp == null) {
         return;
       }
-      int boxHeight = (int)(this.reticleRect.bottom - this.reticleRect.top);
-      int boxWidth = (int)(this.reticleRect.right - this.reticleRect.left);
+
+      double scale = (double)bmp.getWidth() / mCameraView.getWidth();
+      int boxHeight = (int)((this.reticleRect.bottom - this.reticleRect.top) * scale);
+      int boxWidth = (int)((this.reticleRect.right - this.reticleRect.left) * scale);
 
       // Crop the image to just the scanner reticle
-      Bitmap bitmap = Bitmap.createBitmap(bmp, (int)this.reticleRect.left, (int)this.reticleRect.top, boxWidth, boxHeight);
+      Bitmap bitmap = Bitmap.createBitmap(bmp, (int)(this.reticleRect.left * scale), (int)(this.reticleRect.top * scale), boxWidth, boxHeight);
 
       Task<List<Barcode>> task = scanner.process(InputImage.fromBitmap(bitmap, image.getImageInfo().getRotationDegrees()));
       task.addOnSuccessListener(barCodes -> {
