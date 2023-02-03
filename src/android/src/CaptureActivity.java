@@ -44,10 +44,10 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 import com.readyop.cordova.plugins.barcode.scanner.utils.BitmapUtils;
 
@@ -81,6 +81,8 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
   private ScaleGestureDetector _ScaleGestureDetector;
   private GestureDetector _GestureDetector;
+
+  private ImageAnalysis imageAnalysis;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +128,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       if (flashState.getValue() != null) {
         boolean state = flashState.getValue() == 1;
         _TorchButton.setBackgroundResource(getResources().getIdentifier(!state ? "torch_active" : "torch_inactive",
-            "drawable", CaptureActivity.this.getPackageName()));
+          "drawable", CaptureActivity.this.getPackageName()));
         camera.getCameraControl().enableTorch(!state);
       }
 
@@ -169,12 +171,12 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
   private void requestCameraPermission() {
 
     final String[] permissions = new String[] { Manifest.permission.CAMERA,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE };
+      Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
     boolean shouldShowPermission = !ActivityCompat.shouldShowRequestPermissionRationale(this,
-        Manifest.permission.CAMERA);
+      Manifest.permission.CAMERA);
     shouldShowPermission = shouldShowPermission
-        && !ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+      && !ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
     if (shouldShowPermission) {
       ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
@@ -182,13 +184,13 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     }
 
     View.OnClickListener listener = view -> ActivityCompat.requestPermissions(CaptureActivity.this, permissions,
-        RC_HANDLE_CAMERA_PERM);
+      RC_HANDLE_CAMERA_PERM);
 
     findViewById(getResources().getIdentifier("topLayout", "id", getPackageName())).setOnClickListener(listener);
     Snackbar
-        .make(surfaceView, getResources().getIdentifier("permission_camera_rationale", "string", getPackageName()),
-            Snackbar.LENGTH_INDEFINITE)
-        .setAction(getResources().getIdentifier("ok", "string", getPackageName()), listener).show();
+      .make(surfaceView, getResources().getIdentifier("permission_camera_rationale", "string", getPackageName()),
+        Snackbar.LENGTH_INDEFINITE)
+      .setAction(getResources().getIdentifier("ok", "string", getPackageName()), listener).show();
 
   }
 
@@ -209,8 +211,8 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
     builder.setTitle("Camera permission required")
-        .setMessage(getResources().getIdentifier("no_camera_permission", "string", getPackageName()))
-        .setPositiveButton(getResources().getIdentifier("ok", "string", getPackageName()), listener).show();
+      .setMessage(getResources().getIdentifier("no_camera_permission", "string", getPackageName()))
+      .setPositiveButton(getResources().getIdentifier("ok", "string", getPackageName()), listener).show();
   }
 
   @Override
@@ -252,13 +254,14 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     super.onStop();
 
     if (this.camera != null) {
-        this.camera.getCameraControl().cancelFocusAndMetering();
+      this.camera.getCameraControl().cancelFocusAndMetering();
     }
   }
 
+  @SuppressLint("ClickableViewAccessibility")
   void startCamera() {
     mCameraView = findViewById(getResources().getIdentifier("previewView", "id", getPackageName()));
-    mCameraView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW);
+    mCameraView.setImplementationMode(PreviewView.ImplementationMode.PERFORMANCE);
 
     boolean rotateCamera = getIntent().getBooleanExtra("rotateCamera", false);
     if (rotateCamera) {
@@ -269,6 +272,26 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       mCameraView.setScaleY(1F);
     }
 
+    mCameraView.setOnTouchListener((v, event) -> {
+      if (camera == null) {
+        return false;
+      }
+
+      if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        MeteringPoint autoFocusPoint = new SurfaceOrientedMeteringPointFactory(1,1, imageAnalysis).createPoint(0.5f, 0.5f);
+
+        FocusMeteringAction.Builder builder = new FocusMeteringAction.Builder(autoFocusPoint);
+        builder.setAutoCancelDuration(5, TimeUnit.SECONDS);
+
+        FocusMeteringAction autoFocusAction = builder.build();
+        camera.getCameraControl().startFocusAndMetering(autoFocusAction);
+        camera.getCameraControl().setExposureCompensationIndex(3);
+        return true;
+      } else {
+        return false;
+      }
+    });
+
     mCameraView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
       // If the camera isn't ready yet (hasn't been bound to the preview view)
       if (this.camera == null) {
@@ -277,7 +300,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       MeteringPoint autoFocusPoint = new SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(.5f, .5f);
 
       FocusMeteringAction.Builder builder = new FocusMeteringAction.Builder(autoFocusPoint);
-      builder.setAutoCancelDuration(2, TimeUnit.SECONDS);
+      builder.setAutoCancelDuration(3, TimeUnit.SECONDS);
 
       FocusMeteringAction autoFocusAction = builder.build();
       camera.getCameraControl().cancelFocusAndMetering();
@@ -310,18 +333,21 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       barcodeFormat = BarcodeFormats;
     }
 
-    Preview preview = new Preview.Builder().build();
+    int cameraWidth = mCameraView.getWidth();
+    int cameraHeight = mCameraView.getHeight();
 
-    CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
-        .build();
+    CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
 
-    preview.setSurfaceProvider(mCameraView.createSurfaceProvider());
+    Preview.Builder previewBuilder = new Preview.Builder();
+    Preview preview = previewBuilder.build();
+    preview.setSurfaceProvider(mCameraView.getSurfaceProvider());
 
     ImageAnalysis.Builder builder = new ImageAnalysis.Builder();
     builder.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST);
-    builder.setTargetResolution(new Size(mCameraView.getWidth(), mCameraView.getHeight()));
+    builder.setTargetResolution(new Size(cameraWidth, cameraHeight));
+    builder.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888);
 
-    ImageAnalysis imageAnalysis = builder.build();
+    imageAnalysis = builder.build();
 
     BarcodeScanner scanner = BarcodeScanning.getClient(new BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build());
 
@@ -392,8 +418,9 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
     float height = mCameraView.getHeight();
     float width = mCameraView.getWidth();
-    float diameterW = (float)(width * (isCard ? .85 : .75));
-    float diameterH = (float)(diameterW * (isCard ? .5 : 1));
+
+    float diameterW = (float)(width * (isCard ? .84 : .75));
+    float diameterH = (float)(diameterW * (isCard ? .46 : 1));
 
     Canvas canvas = holder.lockCanvas();
     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
