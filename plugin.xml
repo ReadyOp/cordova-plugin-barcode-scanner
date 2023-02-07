@@ -61,6 +61,7 @@
         <resource-file src="src/android/res/assets/beep.ogg" target="assets/beep.ogg" />
         <resource-file src="src/android/res/values/strings-en.xml" target="res/values/strings.xml" />
         <resource-file src="src/android/res/layout/capture_activity.xml" target="res/layout/capture_activity.xml" />
+        <resource-file src="src/android/res/drawable/close.xml" target="res/drawable/close.xml" />
         <resource-file src="src/android/res/drawable/flashlight.png" target="res/drawable/flashlight.png" />
         <resource-file src="src/android/res/drawable/torch_active.xml" target="res/drawable/torch_active.xml" />
         <resource-file src="src/android/res/drawable/torch_inactive.xml" target="res/drawable/torch_inactive.xml" />
