@@ -77,6 +77,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
   private static final int RC_HANDLE_CAMERA_PERM = 2;
   private ImageButton _TorchButton;
+  private ImageButton _CloseButton;
   private Camera camera;
 
   private ScaleGestureDetector _ScaleGestureDetector;
@@ -134,6 +135,11 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
     });
 
+    _CloseButton = findViewById(getResources().getIdentifier("close_button", "id", this.getPackageName()));
+
+    _CloseButton.setOnClickListener(v -> {
+      finish();
+    });
   }
 
   // ----------------------------------------------------------------------------
