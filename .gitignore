@@ -1,0 +1,10 @@
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Modules
+node_modules/
+
+# Android files
+local.properties
+gradlew*
